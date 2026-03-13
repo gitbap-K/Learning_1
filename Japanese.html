@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>히라가나 · 가타카나 연습</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0e1116;
+      --card:#141a22;
+      --accent:#6ea8fe;
+      --accent-2:#9cffd0;
+      --text:#e6ebf2;
+      --muted:#9aa7b5;
+      --danger:#ff6b6b;
+      --success:#46e0a5;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --ring: 0 0 0 3px rgba(110,168,254,.35);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:
+        radial-gradient(1200px 800px at 80% -10%, #1f2b3a 0%, transparent 60%),
+        radial-gradient(1000px 700px at -10% 120%, #1b2a22 0%, transparent 60%),
+        var(--bg);
+      color:var(--text);
+      font-family:"Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans JP",sans-serif;
+      min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+    }
+    .app{ width:min(100%, 980px); }
+    .header{
+      display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px;
+    }
+    .brand{ display:flex; align-items:center; gap:12px; }
+    .logo{
+      width:42px; height:42px; border-radius:12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display:grid; place-items:center; color:#0b1220; font-weight:800;
+      box-shadow: var(--shadow);
+      font-family:"Noto Sans JP"; font-size:22px;
+    }
+    .brand h1{ font-size:20px; margin:0; letter-spacing:.2px; }
+    .controls{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:flex-end;
+    }
+    .control{
+      background:#0f151d; border:1px solid #203044; color:var(--text);
+      padding:10px 12px; border-radius:12px; display:flex; align-items:center; gap:8px;
+    }
+    select, input[type="checkbox"], input[type="radio"]{ accent-color: var(--accent); }
+    select{
+      background:transparent; color:var(--text); border:none; outline:none; font-weight:600;
+    }
+    .seg{
+      display:flex; background:#0b1118; border:1px solid #203044; border-radius:10px; overflow:hidden;
+    }
+    .seg label{
+      padding:8px 10px; cursor:pointer; color:#bcd0e5; font-weight:700; font-size:14px;
+      display:flex; align-items:center; gap:6px;
+    }
+    .seg input{ display:none; }
+    .seg input:checked + span{
+      background: linear-gradient(135deg, #6ea8fe, #53e0b8);
+      color:#0b1220;
+      font-weight:800;
+      border-radius:8px;
+      padding:6px 10px;
+    }
+    .btn{
+      background: linear-gradient(135deg, #6ea8fe, #53e0b8);
+      color:#0b1220; border:none; padding:10px 16px; border-radius:12px; font-weight:800; cursor:pointer;
+      box-shadow: var(--shadow);
+    }
+    .btn.secondary{
+      background:#0f151d; color:var(--text); border:1px solid #203044; font-weight:700;
+    }
+    .grid{ display:grid; grid-template-columns: 1.2fr .8fr; gap:16px; }
+    @media (max-width:880px){ .grid{ grid-template-columns: 1fr; } }
+    .card{
+      background:var(--card); border:1px solid #1f2a36; border-radius:16px; box-shadow: var(--shadow);
+    }
+    .stage{ padding:20px; display:flex; flex-direction:column; gap:16px; min-height:360px; }
+    .prompt{
+      background:#0f151d; border:1px solid #223146; border-radius:14px; display:flex; align-items:center; justify-content:center;
+      min-height:180px; position:relative; overflow:hidden;
+    }
+    .kana{
+      font-family:"Noto Sans JP", "Noto Sans KR", sans-serif;
+      font-weight:700; font-size:120px; line-height:1; letter-spacing:2px;
+      text-shadow: 0 8px 40px rgba(0,0,0,.45);
+      transition: transform .2s ease, color .2s ease;
+    }
+    .kana.flash-correct{ color: var(--success); transform: scale(1.06); }
+    .kana.flash-wrong{ color: var(--danger); animation: shake .28s linear; }
+    @keyframes shake{
+      0%,100%{ transform: translateX(0); }
+      20%{ transform: translateX(-6px); }
+      40%{ transform: translateX(6px); }
+      60%{ transform: translateX(-4px); }
+      80%{ transform: translateX(4px); }
+    }
+    .answer-wrap{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .input{ flex:1; min-width:220px; display:flex; align-items:center; gap:8px;
+      background:#0f151d; border:1px solid #223146; border-radius:12px; padding:12px 14px; }
+    .ring:focus-within{ box-shadow: var(--ring); }
+    .input input{
+      flex:1; background:transparent; border:none; outline:none; color:var(--text); font-size:18px; font-weight:700;
+    }
+    .hint{ color:var(--muted); font-size:13px; }
+    .actions{ display:flex; gap:8px; flex-wrap:wrap; }
+    .meta{
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:14px;
+    }
+    .stats{ display:flex; gap:12px; }
+    .stat-badge{
+      background:#0f151d; border:1px solid #223146; border-radius:999px; padding:6px 10px; color:#b7c2cf;
+    }
+    .side{ padding:16px; }
+    .side h3{ margin:6px 6px 10px; font-size:16px; color:#c9d6e5; }
+    .table{ display:grid; grid-template-columns: repeat(5, 1fr); gap:10px; }
+    .cell{
+      background:#0f151d; border:1px solid #223146; border-radius:12px; padding:10px; text-align:center;
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .cell .k{ font-family:"Noto Sans JP"; font-weight:700; font-size:22px; }
+    .cell .r{ font-size:13px; color:#9fb0c3; }
+    .footer{
+      margin-top:16px; display:flex; justify-content:space-between; gap:10px; color:#8fa1b5; font-size:12px; padding:0 6px;
+    }
+    .kbd{ background:#0f151d; border:1px solid #223146; border-radius:6px; padding:2px 6px; font-size:11px; color:#c6d2df; }
+    .sublabel{ color:#8fa1b5; font-size:12px; margin-left:4px; }
+
+    /* 완료 오버레이 */
+    .complete-banner{
+      position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+      background: radial-gradient(600px 300px at 50% 50%, rgba(83,224,184,.08), transparent 60%);
+      pointer-events:none;
+    }
+    .complete-banner.show{ display:flex; animation: fadeOut 1500ms ease forwards; }
+    .complete-text{
+      background: rgba(20,26,34,.8);
+      border:1px solid #223146; border-radius:999px; padding:8px 14px;
+      color:#d3ffe9; font-weight:800; letter-spacing:.3px;
+    }
+    @keyframes fadeOut{ 0%{opacity:1} 90%{opacity:1} 100%{opacity:0} }
+
+    /* 표 토글 시 숨김 */
+    .side.hidden{ display:none; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="brand">
+        <div class="logo" id="logoChar">あ</div>
+        <div>
+          <h1>히라가나 · 가타카나 연습</h1>
+          <div class="sublabel">아 행부터 선택한 행까지 랜덤 출제 • 히라가나, 가타카나 가능.</div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control">
+          문자
+          <div class="seg" role="tablist" aria-label="문자 선택">
+            <label>
+              <input type="radio" name="syllabary" id="hiraganaMode" checked>
+              <span>히라가나</span>
+            </label>
+            <label>
+              <input type="radio" name="syllabary" id="katakanaMode">
+              <span>가타카나</span>
+            </label>
+          </div>
+        </div>
+        <div class="control">
+          학습 끝 행
+          <select id="endRowSelect" aria-label="학습 끝 행 선택"></select>
+        </div>
+        <label class="control">
+          <input type="checkbox" id="includeNCheck"> ん/ン 포함
+        </label>
+        <label class="control">
+          <input type="checkbox" id="showTableCheck"> 범위 표 표시
+        </label>
+        <button class="btn" id="startBtn">시작 / 리셋</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card stage">
+        <div class="prompt">
+          <div class="kana" id="kana" role="status" aria-live="polite">—</div>
+          <div class="complete-banner" id="completeBanner">
+            <div class="complete-text">한 바퀴 완료! 잘했어요 🎉</div>
+          </div>
+          <!-- 컨페티 캔버스는 JS에서 필요 시 생성 -->
+        </div>
+
+        <div class="answer-wrap">
+          <label class="input ring" style="flex:1">
+            <input id="answer" type="text" placeholder="발음(한글) 입력 예: 아, 카, 시, 치, 츠..." autocomplete="off" inputmode="text" autofocus />
+          </label>
+          <div class="actions">
+            <button class="btn secondary" id="revealBtn" title="정답 보기"><span>정답 보기</span></button>
+            <button class="btn secondary" id="skipBtn" title="패스">패스</button>
+          </div>
+        </div>
+
+        <div class="meta">
+          <div class="hint" id="hintArea">발음을 입력하고 Enter를 눌러주세요.</div>
+          <div class="stat">남은 문제: <span id="remaining">0</span></div>
+          <div class="stats">
+            <div class="stat-badge">정답 <span id="correct">0</span></div>
+            <div class="stat-badge">전체 <span id="total">0</span></div>
+            <div class="stat-badge">정확도 <span id="acc">0%</span></div>
+            <div class="stat-badge">연속 <span id="streak">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card side hidden" id="sidePanel">
+        <h3>현재 학습 범위 표</h3>
+        <div class="table" id="table"></div>
+        <div class="footer">
+          <div>Made: [bapjwoyo] </div>
+          <div><span class="kbd">Enter</span> 오답일 때는 흔들림, <span class="kbd">패스</span>로 건너뛰기</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ===== 데이터 =====
+const ROWS = [
+  { id:'a',  label:'あ 행', items:[ {k:'あ', a:['아']}, {k:'い', a:['이']}, {k:'う', a:['우']}, {k:'え', a:['에']}, {k:'お', a:['오']} ]},
+  { id:'ka', label:'か 행', items:[ {k:'か', a:['카']}, {k:'き', a:['키']}, {k:'く', a:['쿠']}, {k:'け', a:['케']}, {k:'こ', a:['코']} ]},
+  { id:'sa', label:'さ 행', items:[ {k:'さ', a:['사']}, {k:'し', a:['시']}, {k:'す', a:['스']}, {k:'せ', a:['세']}, {k:'そ', a:['소']} ]},
+  { id:'ta', label:'た 행', items:[ {k:'た', a:['타']}, {k:'ち', a:['치']}, {k:'つ', a:['츠','쓰']}, {k:'て', a:['테']}, {k:'と', a:['토']} ]},
+  { id:'na', label:'な 행', items:[ {k:'な', a:['나']}, {k:'に', a:['니']}, {k:'ぬ', a:['누']}, {k:'ね', a:['네']}, {k:'の', a:['노']} ]},
+  { id:'ha', label:'は 행', items:[ {k:'は', a:['하']}, {k:'ひ', a:['히']}, {k:'ふ', a:['후']}, {k:'へ', a:['헤']}, {k:'ほ', a:['호']} ]},
+  { id:'ma', label:'ま 행', items:[ {k:'ま', a:['마']}, {k:'み', a:['미']}, {k:'む', a:['무']}, {k:'め', a:['메']}, {k:'も', a:['모']} ]},
+  { id:'ya', label:'や 행', items:[ {k:'や', a:['야']}, {k:'ゆ', a:['유']}, {k:'よ', a:['요']} ]},
+  { id:'ra', label:'ら 행', items:[ {k:'ら', a:['라']}, {k:'り', a:['리']}, {k:'る', a:['루']}, {k:'れ', a:['레']}, {k:'ろ', a:['로']} ]},
+  { id:'wa', label:'わ 행', items:[ {k:'わ', a:['와']}, {k:'を', a:['오','오(를)']} ]}
+];
+const N_CHAR = { id:'n', label:'ん', items:[ {k:'ん', a:['응']} ] };
+
+// ===== 유틸 =====
+const toKatakana = str => str.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+const shuffle = arr => { const a = arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const normalize = s => (s||'').toString().trim().replace(/\s+/g,'').toLowerCase();
+
+// ===== DOM =====
+const endRowSelect = document.getElementById('endRowSelect');
+const includeNCheck = document.getElementById('includeNCheck');
+const showTableCheck = document.getElementById('showTableCheck');
+const startBtn = document.getElementById('startBtn');
+const kanaEl = document.getElementById('kana');
+const answerEl = document.getElementById('answer');
+const revealBtn = document.getElementById('revealBtn');
+const skipBtn = document.getElementById('skipBtn');
+const totalEl = document.getElementById('total');
+const correctEl = document.getElementById('correct');
+const accEl = document.getElementById('acc');
+const streakEl = document.getElementById('streak');
+const remainingEl = document.getElementById('remaining');
+const sidePanel = document.getElementById('sidePanel');
+const tableEl = document.getElementById('table');
+const completeBanner = document.getElementById('completeBanner');
+const hiraganaMode = document.getElementById('hiraganaMode');
+const katakanaMode = document.getElementById('katakanaMode');
+const logoChar = document.getElementById('logoChar');
+const hintArea = document.getElementById('hintArea');
+
+// ===== 상태 =====
+let pool = [], order = [], idx = 0, started = false;
+let total = 0, correct = 0, streak = 0;
+
+// ===== 드롭다운 초기화 (선택 보존) =====
+function populateEndRowSelect() {
+  const prev = endRowSelect.selectedIndex;
+  endRowSelect.innerHTML = '';
+  ROWS.forEach((row, index) => {
+    const opt = document.createElement('option');
+    opt.value = index;
+    let label = row.label;
+    if (katakanaMode.checked) label = toKatakana(row.label.replace(' 행','')) + ' 행';
+    opt.textContent = label;
+    endRowSelect.appendChild(opt);
+  });
+  endRowSelect.selectedIndex = (prev >= 0 && prev < ROWS.length) ? prev : (ROWS.length - 1);
+}
+
+function getSafeEndRow() {
+  const v = parseInt(endRowSelect.value, 10);
+  if (Number.isNaN(v)) return ROWS.length - 1;
+  return Math.max(0, Math.min(ROWS.length - 1, v));
+}
+
+function updateLogoChar(){ logoChar.textContent = hiraganaMode.checked ? 'あ' : 'ア'; }
+
+// ===== 학습 범위 표 렌더링 =====
+function renderTable() {
+  tableEl.innerHTML = '';
+  const endRow = getSafeEndRow();
+  let displayItems = [];
+  for (let i = 0; i <= endRow; i++) displayItems.push(...ROWS[i].items);
+  if (includeNCheck.checked) displayItems.push(...N_CHAR.items);
+
+  if (displayItems.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'cell';
+    empty.innerHTML = `<div class="k">—</div><div class="r">학습 범위가 비어있습니다</div>`;
+    tableEl.appendChild(empty);
+    return;
+  }
+
+  displayItems.forEach(item => {
+    const isKat = katakanaMode.checked;
+    const char = isKat ? toKatakana(item.k) : item.k;
+    const reading = Array.isArray(item.a) ? item.a.join(', ') : item.a;
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    const kDiv = document.createElement('div');
+    kDiv.className = 'k';
+    kDiv.textContent = char;
+    const rDiv = document.createElement('div');
+    rDiv.className = 'r';
+    rDiv.textContent = reading;
+    cell.appendChild(kDiv);
+    cell.appendChild(rDiv);
+    tableEl.appendChild(cell);
+  });
+}
+
+endRowSelect.addEventListener('change', () => { renderTable(); savePrefs(); });
+includeNCheck.addEventListener('change', () => { renderTable(); savePrefs(); });
+
+hiraganaMode.addEventListener('change', () => { populateEndRowSelect(); renderTable(); updateLogoChar(); savePrefs(); });
+katakanaMode.addEventListener('change', () => { populateEndRowSelect(); renderTable(); updateLogoChar(); savePrefs(); });
+
+showTableCheck.addEventListener('change', () => {
+  sidePanel.classList.toggle('hidden', !showTableCheck.checked);
+  if (showTableCheck.checked) renderTable();
+  savePrefs();
+});
+
+// ===== 컨페티 =====
+function launchConfetti() {
+  const canvas = document.createElement('canvas');
+  canvas.style.position = 'fixed';
+  canvas.style.top = 0;
+  canvas.style.left = 0;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.pointerEvents = 'none';
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const particles = [];
+  const colors = ['#6ea8fe', '#53e0b8', '#ff6b6b', '#ffe66d', '#9cffd0'];
+  for (let i = 0; i < 120; i++) {
+    particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height - canvas.height, w: 8, h: 8, color: colors[Math.floor(Math.random()*colors.length)], speed: 2+Math.random()*4, angle: Math.random()*2*Math.PI });
+  }
+  function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.y += p.speed; p.x += Math.sin(p.angle)*2; ctx.fillStyle = p.color; ctx.fillRect(p.x,p.y,p.w,p.h); });
+  }
+  let frame = 0;
+  (function loop(){ frame++; render(); if(frame<200) requestAnimationFrame(loop); else document.body.removeChild(canvas); })();
+}
+function showCompleteBanner() {
+  completeBanner.classList.add('show');
+  launchConfetti();
+  setTimeout(()=>completeBanner.classList.remove('show'),1500);
+}
+
+// ===== 게임 로직 =====
+function startQuiz() {
+  const endRow = getSafeEndRow();
+  pool = [];
+  for (let i=0; i<=endRow; i++) pool.push(...ROWS[i].items);
+  if (includeNCheck.checked) pool.push(...N_CHAR.items);
+
+  if (pool.length === 0) {
+    hintArea.textContent = '학습 범위를 먼저 선택해주세요.';
+    return;
+  }
+
+  if (katakanaMode.checked) pool = pool.map(item => ({k: toKatakana(item.k), a: item.a}));
+  order = shuffle([...Array(pool.length).keys()]);
+  idx = 0; started = true;
+  total = correct = streak = 0;
+  updateStats();
+  renderTable();
+  showQuestion();
+}
+
+function showQuestion() {
+  if (idx >= order.length) { showCompleteBanner(); idx = 0; order = shuffle(order); }
+  kanaEl.textContent = pool[order[idx]].k;
+  answerEl.value = '';
+  answerEl.focus();
+}
+
+function updateStats() {
+  totalEl.textContent = total;
+  correctEl.textContent = correct;
+  accEl.textContent = total ? ((correct/total)*100).toFixed(1)+'%' : '0%';
+  streakEl.textContent = streak;
+  remainingEl.textContent = Math.max(0, order.length - idx);
+}
+
+function checkAnswer() {
+  if (!started) return;
+  const raw = answerEl.value;
+  const ans = normalize(raw);
+  if (!ans) { // 빈 입력은 무시
+    hintArea.textContent = '발음을 입력한 뒤 Enter를 눌러주세요.';
+    return;
+  }
+  const correctAnswers = pool[order[idx]].a.map(normalize);
+  total++;
+  if (correctAnswers.includes(ans)) {
+    correct++; streak++;
+    kanaEl.classList.add('flash-correct');
+    setTimeout(() => {
+      kanaEl.classList.remove('flash-correct');
+      idx++;
+      showQuestion();
+      updateStats();
+    }, 200);
+  } else {
+    streak = 0;
+    kanaEl.classList.add('flash-wrong');
+    navigator.vibrate?.(60);
+    setTimeout(()=>kanaEl.classList.remove('flash-wrong'),300);
+    updateStats();
+  }
+}
+
+// ===== 설정 저장 =====
+function savePrefs() {
+  try {
+    localStorage.setItem('kanaPrefs', JSON.stringify({
+      endRow: endRowSelect.selectedIndex,
+      includeN: includeNCheck.checked,
+      showTable: showTableCheck.checked,
+      mode: katakanaMode.checked ? 'katakana' : 'hiragana',
+    }));
+  } catch {}
+}
+function loadPrefs() {
+  try {
+    const s = localStorage.getItem('kanaPrefs');
+    if (!s) return;
+    const p = JSON.parse(s);
+    (p.mode === 'katakana' ? katakanaMode : hiraganaMode).checked = true;
+    populateEndRowSelect();
+    endRowSelect.selectedIndex = (p.endRow ?? endRowSelect.selectedIndex);
+    includeNCheck.checked = !!p.includeN;
+    showTableCheck.checked = !!p.showTable;
+    sidePanel.classList.toggle('hidden', !showTableCheck.checked);
+  } catch {}
+}
+
+// ===== 이벤트 =====
+startBtn.addEventListener('click', startQuiz);
+answerEl.addEventListener('keydown', e => { if (e.key === 'Enter') checkAnswer(); });
+revealBtn.addEventListener('click', () => { if(started) hintArea.textContent = `정답: ${pool[order[idx]].a.join(', ')}`; });
+skipBtn.addEventListener('click', () => { if(started){ idx++; showQuestion(); updateStats(); } });
+
+// 단축키: R=정답, S=패스
+document.addEventListener('keydown', (e) => {
+  if (!started) return;
+  const k = e.key.toLowerCase();
+  if (k === 'r') revealBtn.click();
+  if (k === 's') skipBtn.click();
+});
+
+// ===== 초기화 =====
+populateEndRowSelect();
+loadPrefs();
+updateLogoChar();
+renderTable();
+</script>
+</body>
+</html>
